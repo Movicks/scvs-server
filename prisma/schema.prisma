@@ -1,0 +1,111 @@
+// Prisma schema for SCVS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum InstitutionStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum CertificateStatus {
+  VALID
+  REVOKED
+  EXPIRED
+}
+
+enum Role {
+  SUPER_ADMIN
+  INSTITUTION_ADMIN
+  STUDENT
+  VERIFIER
+}
+
+model Institution {
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  accreditationId  String
+  status           InstitutionStatus  @default(PENDING)
+  publicKey        String?
+  logoUrl          String?
+  createdAt        DateTime           @default(now())
+
+  // Relations
+  users        User[]
+  students     Student[]
+  certificates Certificate[]
+}
+
+model User {
+  id               String     @id @default(auto()) @map("_id") @db.ObjectId
+  institutionId    String?    @db.ObjectId
+  role             Role
+  email            String     @unique
+  passwordHash     String
+  status           UserStatus @default(PENDING)
+  createdAt        DateTime   @default(now())
+  refreshTokenHash String?
+
+  institution Institution? @relation(fields: [institutionId], references: [id])
+  auditLogs   AuditLog[]
+}
+
+model Student {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  institutionId  String     @db.ObjectId
+  fullName       String
+  matricNumber   String
+  createdAt      DateTime   @default(now())
+
+  institution Institution @relation(fields: [institutionId], references: [id])
+  certificates Certificate[]
+
+  @@index([matricNumber])
+}
+
+model Certificate {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  certificateNumber String             @unique
+  institutionId     String             @db.ObjectId
+  studentId         String             @db.ObjectId
+  metadata          Json
+  hash              String
+  signature         String
+  pdfUrl            String?
+  status            CertificateStatus  @default(VALID)
+  issuedAt          DateTime           @default(now())
+  revokedAt         DateTime?
+
+  institution Institution @relation(fields: [institutionId], references: [id])
+  student     Student     @relation(fields: [studentId], references: [id])
+
+  @@index([institutionId, studentId])
+}
+
+model AuditLog {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  actorId    String?   @db.ObjectId
+  action     String
+  entityType String
+  entityId   String?
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime  @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+}

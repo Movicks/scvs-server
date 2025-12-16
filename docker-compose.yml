@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    container_name: scvs-postgres
+    environment:
+      POSTGRES_DB: scvs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: scvs-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: scvs-minio
+    environment:
+      MINIO_ROOT_USER: scvsadmin
+      MINIO_ROOT_PASSWORD: scvsadmin12345
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - miniodata:/data
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
