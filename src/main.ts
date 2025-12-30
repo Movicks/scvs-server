@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { Logger } from 'nestjs-pino'
 import { json, urlencoded } from 'express'
+import * as cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true })
@@ -12,6 +13,7 @@ async function bootstrap() {
   app.enableCors({ origin: true, credentials: true })
   app.use(json({ limit: '5mb' }))
   app.use(urlencoded({ extended: true }))
+  app.use(cookieParser())
 
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff')
