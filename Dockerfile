@@ -1,7 +1,7 @@
 # -------- Build stage --------
     FROM node:20-alpine AS builder
 
-    WORKDIR /app
+    WORKDIR /src
     
     COPY package*.json ./
     RUN npm ci
@@ -12,12 +12,12 @@
     # -------- Runtime stage --------
     FROM node:20-alpine
     
-    WORKDIR /app
+    WORKDIR /src
     
     COPY package*.json ./
     RUN npm ci --only=production
     
-    COPY --from=builder /app/dist ./dist
+    COPY --from=builder /src/dist ./dist
     
     CMD ["node", "dist/main.js"]
     
