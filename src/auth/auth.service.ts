@@ -233,8 +233,7 @@ export class AuthService {
   async superAdminLogin(dto: { email: string; password: string }, req: any) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (!user) throw new UnauthorizedException('Invalid credentials')
--    if (user.role !== Role.SUPER_ADMIN) throw new UnauthorizedException('Invalid credentials')
-+    if (user.role !== 'SUPER_ADMIN') throw new UnauthorizedException('Invalid credentials')
+    if (user.role !== 'SUPER_ADMIN') throw new UnauthorizedException('Invalid credentials')
 
     const ok = await argon2.verify(user.passwordHash, dto.password)
     if (!ok) throw new UnauthorizedException('Invalid credentials')
