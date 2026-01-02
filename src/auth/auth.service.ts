@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service'
 import { JwtService } from '@nestjs/jwt'
 import { AuditService } from '../audit/audit.service'
 import * as argon2 from 'argon2'
-import { UserStatus, Role, Prisma } from '@prisma/client'
 
 @Injectable()
 export class AuthService {
@@ -83,7 +82,7 @@ export class AuthService {
         },
       })
     } catch (e: any) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if ((e as any)?.code === 'P2002') {
         const target = Array.isArray((e as any)?.meta?.target) ? (e as any).meta.target.join(',') : (e as any)?.meta?.target
         if (typeof target === 'string') {
           if (target.includes('accreditationId')) {
@@ -105,13 +104,13 @@ export class AuthService {
         data: {
           email: dto.email,
           passwordHash,
-          role: Role.INSTITUTION_ADMIN,
-          status: 'ACTIVE' as UserStatus,
+          role: 'INSTITUTION_ADMIN',
+          status: 'ACTIVE',
           institutionId: inst.id,
         },
       })
     } catch (e: any) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if ((e as any)?.code === 'P2002') {
         throw new BadRequestException('Email already registered')
       }
       throw e
@@ -195,7 +194,7 @@ export class AuthService {
 
   async superAdminSignup(dto: { email: string; password: string }, req: any) {
     // Prevent multiple super admins from being created via public endpoint
-    const existingSuperAdmins = await this.prisma.user.count({ where: { role: Role.SUPER_ADMIN } })
+    const existingSuperAdmins = await this.prisma.user.count({ where: { role: 'SUPER_ADMIN' } })
     if (existingSuperAdmins > 0) {
       throw new UnauthorizedException('Super admin signup is disabled')
     }
@@ -210,12 +209,12 @@ export class AuthService {
         data: {
           email: dto.email,
           passwordHash,
-          role: Role.SUPER_ADMIN,
-          status: 'ACTIVE' as UserStatus,
+          role: 'SUPER_ADMIN',
+          status: 'ACTIVE',
         },
       })
     } catch (e: any) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      if ((e as any)?.code === 'P2002') {
         throw new BadRequestException('Email already registered')
       }
       throw e
@@ -234,7 +233,7 @@ export class AuthService {
   async superAdminLogin(dto: { email: string; password: string }, req: any) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (!user) throw new UnauthorizedException('Invalid credentials')
-    if (user.role !== Role.SUPER_ADMIN) throw new UnauthorizedException('Invalid credentials')
+    if (user.role !== 'SUPER_ADMIN') throw new UnauthorizedException('Invalid credentials')
 
     const ok = await argon2.verify(user.passwordHash, dto.password)
     if (!ok) throw new UnauthorizedException('Invalid credentials')

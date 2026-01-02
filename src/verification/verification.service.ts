@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CryptoService } from '../crypto/crypto.service'
-import { CertificateStatus, InstitutionStatus } from '@prisma/client'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import type { Cache } from 'cache-manager'
 
@@ -22,7 +21,7 @@ export class VerificationService {
     if (!cert) throw new NotFoundException('Certificate not found')
 
     const institution = await this.prisma.institution.findUnique({ where: { id: cert.institutionId } })
-    if (!institution || institution.status !== InstitutionStatus.APPROVED) {
+    if (!institution || institution.status !== 'APPROVED') {
       throw new NotFoundException('Certificate invalid')
     }
 
@@ -39,7 +38,7 @@ export class VerificationService {
       certificateId: cert.id,
       certificateNumber: cert.certificateNumber,
       status: cert.status,
-      valid: cert.status === CertificateStatus.VALID && hash === cert.hash && signatureValid,
+      valid: cert.status === 'VALID' && hash === cert.hash && signatureValid,
       metadata: cert.metadata,
       issuedAt: cert.issuedAt,
       institution: {
