@@ -10,8 +10,9 @@ import { CertificatesModule } from './certificates/certificates.module'
 import { VerificationModule } from './verification/verification.module'
 import { InstitutionsModule } from './institutions/institutions.module'
 import { StudentsModule } from './students/students.module'
-import { APP_GUARD } from '@nestjs/core'
-import { RolesGuard } from './common/guards/roles.guard'
+// Remove APP_GUARD RolesGuard registration
+// import { APP_GUARD } from '@nestjs/core'
+// import { RolesGuard } from './common/guards/roles.guard'
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { RolesGuard } from './common/guards/roles.guard'
     StudentsModule,
   ],
   providers: [
-    { provide: APP_GUARD, useClass: RolesGuard },
+    // Removed global RolesGuard provider
+    // { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}
