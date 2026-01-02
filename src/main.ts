@@ -43,7 +43,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
 
-  const port = Number(process.env.PORT) || 9000
+  const port = Number(process.env.PORT, hostname: '0.0.0.0') || 9000
   await app.listen(port)
   console.log(`SCVS backend listening on http://localhost:${port}`)
 }

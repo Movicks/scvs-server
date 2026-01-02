@@ -2,7 +2,6 @@ import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/com
 import { PrismaService } from '../prisma/prisma.service'
 import { AuditService } from '../audit/audit.service'
 import { CryptoService } from '../crypto/crypto.service'
-import { CertificateStatus, InstitutionStatus } from '@prisma/client'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import * as QRCode from 'qrcode'
 
@@ -35,7 +34,7 @@ export class CertificatesService {
   async issue(dto: IssueCertificateDto, actorId?: string) {
     const institution = await this.prisma.institution.findUnique({ where: { id: dto.institutionId } })
     if (!institution) throw new BadRequestException('Invalid institution')
-    if (institution.status !== InstitutionStatus.APPROVED) throw new ForbiddenException('Institution not approved')
+    if (institution.status !== 'APPROVED') throw new ForbiddenException('Institution not approved')
 
     const canonical = JSON.stringify({
       institutionId: dto.institutionId,
@@ -57,7 +56,7 @@ export class CertificatesService {
         metadata: dto.metadata as any,
         hash,
         signature,
-        status: CertificateStatus.VALID,
+        status: 'VALID',
       },
     })
 
@@ -115,7 +114,7 @@ export class CertificatesService {
   async revoke(id: string, actorId?: string) {
     const cert = await this.prisma.certificate.update({
       where: { id },
-      data: { status: CertificateStatus.REVOKED, revokedAt: new Date() },
+      data: { status: 'REVOKED', revokedAt: new Date() },
     })
     await this.audit.log({
       action: 'CERTIFICATE_REVOKE',
