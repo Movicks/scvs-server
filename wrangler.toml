@@ -1,0 +1,5 @@
+name = "scvs-server-base"
+compatibility_date = "2026-01-02"
+
+# Optional: disable Wrangler telemetry for CI runs
+send_metrics = false
