@@ -1,7 +1,5 @@
 import { Controller, Get, Param, Post, Body, UseGuards } from '@nestjs/common'
 import { CertificatesService } from './certificates.service'
-import { Roles } from '../common/decorators/roles.decorator'
-import { Role } from '@prisma/client'
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard'
 import { CurrentUser } from '../common/decorators/current-user.decorator'
 import {
@@ -25,9 +23,10 @@ import { ApiExtraModels, getSchemaPath } from '@nestjs/swagger'
 export class CertificatesController {
   constructor(private readonly service: CertificatesService) {}
 
+  // In create endpoint, remove @Roles and adjust forbidden description
   @Post()
   @UseGuards(JwtAccessGuard)
-  @Roles(Role.INSTITUTION_ADMIN)
+  // removed @Roles(Role.INSTITUTION_ADMIN)
   @ApiOperation({ summary: 'Issue a certificate' })
   @ApiBody({
     description: 'Certificate issuance payload',
@@ -45,7 +44,7 @@ export class CertificatesController {
   @ApiCreatedResponse({ description: 'Certificate issued successfully' })
   @ApiBadRequestResponse({ description: 'Invalid institution or bad request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Institution not approved or insufficient role' })
+  @ApiForbiddenResponse({ description: 'Institution not approved' })
   create(
     @CurrentUser() user: any,
     @Body()
@@ -54,9 +53,10 @@ export class CertificatesController {
     return this.service.issue({ institutionId: user.institutionId, ...dto }, user.id)
   }
 
+  // In bulk endpoint, remove @Roles and adjust forbidden description
   @Post('bulk')
   @UseGuards(JwtAccessGuard)
-  @Roles(Role.INSTITUTION_ADMIN)
+  // removed @Roles(Role.INSTITUTION_ADMIN)
   @ApiOperation({ summary: 'Bulk issue certificates' })
   @ApiBody({
     description: 'Array of certificate issuance payloads',
@@ -76,7 +76,7 @@ export class CertificatesController {
   })
   @ApiCreatedResponse({ description: 'Certificates issued successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Insufficient role' })
+  @ApiForbiddenResponse({ description: 'Institution not approved' })
   bulk(
     @CurrentUser() user: any,
     @Body()
@@ -97,12 +97,12 @@ export class CertificatesController {
 
   @Post(':id/revoke')
   @UseGuards(JwtAccessGuard)
-  @Roles(Role.INSTITUTION_ADMIN, Role.SUPER_ADMIN)
+  // removed @Roles(Role.INSTITUTION_ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Revoke a certificate' })
   @ApiParam({ name: 'id', type: 'string', description: 'Certificate ID' })
   @ApiOkResponse({ description: 'Certificate revoked successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Insufficient role' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   revoke(@CurrentUser() user: any, @Param('id') id: string) {
     return this.service.revoke(id, user.id)
   }

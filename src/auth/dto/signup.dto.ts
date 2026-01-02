@@ -19,7 +19,5 @@ export class SignupDto {
   @ApiProperty({ description: 'Accreditation identifier issued by regulator', example: 'NUC-UNI-2024-0001' })
   accreditationId: string
 
-  // Fixed: only institution admin is allowed to sign up
-  @ApiProperty({ description: 'User role fixed to INSTITUTION_ADMIN', example: 'INSTITUTION_ADMIN', readOnly: true })
-  role: 'INSTITUTION_ADMIN' = 'INSTITUTION_ADMIN'
+  // Role is NOT accepted from client; backend defaults to INSTITUTION_ADMIN
 }

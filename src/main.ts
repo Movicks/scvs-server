@@ -4,13 +4,13 @@ import { ValidationPipe } from '@nestjs/common'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { Logger } from 'nestjs-pino'
 import { json, urlencoded } from 'express'
-import * as cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true })
   app.useLogger(app.get(Logger))
 
-  app.enableCors({ origin: true, credentials: true })
+  app.enableCors({ origin: ['http://localhost:3000'], credentials: true })
   app.use(json({ limit: '5mb' }))
   app.use(urlencoded({ extended: true }))
   app.use(cookieParser())
@@ -43,6 +43,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
 
-  await app.listen(process.env.PORT || 3000)
+  const port = Number(process.env.PORT) || 9000
+  await app.listen(port)
+  console.log(`SCVS backend listening on http://localhost:${port}`)
 }
 bootstrap()
