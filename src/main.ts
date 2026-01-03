@@ -10,7 +10,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true })
   app.useLogger(app.get(Logger))
 
-  app.enableCors({ origin: ['http://localhost:3000'], credentials: true })
+  const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : [];
+
+  app.enableCors({
+    origin: corsOrigins,
+    credentials: true,
+  });
+  
   app.use(json({ limit: '5mb' }))
   app.use(urlencoded({ extended: true }))
   app.use(cookieParser())
