@@ -30,12 +30,16 @@ import { StudentsModule } from './students/students.module'
     AuthModule,
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => ({
-        store: await redisStore({
-          url: process.env.REDIS_URL,
-          ttl: 60,
-        }),
-      }),
+      useFactory: async () => {
+        const url = process.env.REDIS_URL
+        if (url && url.trim() !== '') {
+          return {
+            store: await redisStore({ url, ttl: 60 }),
+          }
+        }
+        // Fallback to in-memory cache when REDIS_URL is not provided
+        return { ttl: 60 }
+      },
     }),
     CertificatesModule,
     VerificationModule,

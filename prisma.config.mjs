@@ -1,6 +1,5 @@
-'use strict';
-const dotenv = require('dotenv');
-const { defineConfig } = require('prisma/config');
+import dotenv from 'dotenv';
+import { defineConfig } from 'prisma/config';
 
 dotenv.config({ override: true });
 
@@ -22,7 +21,7 @@ const raw = process.env.DATABASE_URL;
 const url = ensureDbName(raw);
 // console.log('[PrismaConfig] Using DATABASE_URL =', url);
 
-module.exports = defineConfig({
+export default defineConfig({
   schema: 'prisma/schema.prisma',
   datasource: {
     url,
